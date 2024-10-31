@@ -28,7 +28,7 @@ WHACK_WIDTH = 663
 WHACK_HEIGHT = 634
 
 img_base = Image.open("grayscale.png")
-hwnd = 0x23108A
+hwnd = 0x7012f8
 
 
 def fill_lists():
