@@ -78,11 +78,15 @@ def get_img(bitmap):
 
 fill_lists()
 
-def crop_game_image(bitmap):
+def diffrence_between_images(bitmap, crop_box, img_base=img_base):
     """    Crop ingame image for comparasion to whack grayscale.png
 
     Args:
         bitmap (bitmap): Bitmap of game window
+
+        img_base (Image, optional): Different image used as a base
+        
+        crop_box (tuple, optional): where to crop the bitmap to
 
     Returns:
         Image: Image difference between bitmap and grayscale.png
@@ -92,12 +96,7 @@ def crop_game_image(bitmap):
     img_difference = ImageChops.difference(
         img_base,
         img_gray.crop(
-            (
-                WHACK_OFFSET_X,
-                WHACK_OFFSET_Y,
-                WHACK_OFFSET_X + WHACK_WIDTH,
-                WHACK_OFFSET_Y + WHACK_HEIGHT,
-            )
+                crop_box
         ),
     )
     return img_difference
@@ -140,7 +139,9 @@ def game_bot():
             result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
 
             if result == 1:
-                img_difference = crop_game_image(bitmap)
+                img_difference = diffrence_between_images(bitmap, 
+                                    crop_box=(WHACK_OFFSET_X, WHACK_OFFSET_Y, WHACK_OFFSET_X + WHACK_WIDTH, WHACK_OFFSET_Y + WHACK_HEIGHT)
+                                    )
                 for index, potato_position in enumerate(POTATO_POSITIONS):
                     average_box = img_difference.crop(POTATO_CROP_BOX_POSITIONS[index])
                     if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
@@ -162,11 +163,17 @@ while True:
         # print("checking window")
         memdc, bitmap = get_bitmap(hwnd)
         result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
-        img_difference = crop_game_image(bitmap)
-        #check if player is in
-        if int(np.average(np.array(img_difference))) <= 1:
-            # print("player in whack, starting bot")
+        img_difference = diffrence_between_images(bitmap, 
+                            crop_box=(WHACK_OFFSET_X, WHACK_OFFSET_Y, WHACK_OFFSET_X + WHACK_WIDTH, WHACK_OFFSET_Y + WHACK_HEIGHT)
+                            )
+        shop_image = diffrence_between_images(bitmap, 
+                            img_base=Image.open("grayscale_shop.png"), 
+                            crop_box=(1474, 909, 1654, 994)
+                            )
+        #check if player is in whack main window or in whack shop
+        if int(np.average(np.array(img_difference))) <= 1 or int(np.average(np.array(shop_image))) <= 10:
             # Start whack
+            print("starting whacking")
             pyautogui.click(
                 START_BUTTON_COORDINATES[0],
                 START_BUTTON_COORDINATES[1]
@@ -177,6 +184,6 @@ while True:
             pass 
             # code for checking if player is in main game window and checking if whack has ended - to be done
     else:
-        # print("sleeping")
+        print("sleeping")
         sleep(5)
     
