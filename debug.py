@@ -21,10 +21,12 @@ def background_screenshot(hwnd, width, height):
 windowname="Farmer Against Potatoes Idle"
 
 hwnd = FindWindow(None, windowname)
+print(hex(hwnd))
 background_screenshot(hwnd, 1280, 780)
 
 def windows(hwnd, ctx):
     if win32gui.IsWindowVisible(hwnd):
-        print(hex(hwnd), win32gui.GetWindowText(hwnd))
+        if win32gui.GetWindowText(hwnd) == windowname:
+            print(hex(hwnd), win32gui.GetWindowText(hwnd))
 
 win32gui.EnumWindows(windows, None)
