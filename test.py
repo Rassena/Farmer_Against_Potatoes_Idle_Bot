@@ -23,9 +23,9 @@ for i in range(157, 160):
 
 for i in range(0,5):
     for j in range(3):
-        POTATO_POSITIONS.append((55+131*i, 139+215*j))
+        POTATO_POSITIONS.append((65+131*i, 139+215*j))
         CLOSET_INDEX.append((i,j))
-        POTATO_CROP_BOX_POSITIONS.append((50+131*i, 134+215*j, 60+131*i, 144+215*j))
+        POTATO_CROP_BOX_POSITIONS.append((60+131*i, 134+215*j, 70+131*i, 144+215*j))
 
 # Replace with the hexadecimal handle of the window you want to capture
 window = 0
@@ -90,7 +90,7 @@ for i in range(2000):
                 else:
                     average_box = tmp.crop(POTATO_CROP_BOX_POSITIONS[i])
                     image_array_average = np.average(np.array(average_box))
-                    print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value)
+                    print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
                     last_closet = CLOSET_INDEX[i]
                     last_value = value
 
