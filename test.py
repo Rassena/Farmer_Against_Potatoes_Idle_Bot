@@ -39,9 +39,9 @@ win32gui.EnumWindows(windows, None)
 
 hwnd = 0x390f5a
 
-print(hwnd)
+# print(hwnd)
 
-for i in range(4000):
+for i in range(40000):
     if win32gui.IsWindow(hwnd):
         # Get the window's dimensions
         left, top, right, bottom = win32gui.GetWindowRect(hwnd)
@@ -82,17 +82,17 @@ for i in range(4000):
                 average_box = tmp.crop(POTATO_CROP_BOX_POSITIONS[i])
                 image_array_average = int(np.average(np.array(average_box)))
                 if image_array_average in ALLOWED_COLORS:
-                    print(CLOSET_INDEX[i], value, image_array_average)
+                    # print(CLOSET_INDEX[i], value, image_array_average)
                     pyautogui.click(POTATO_POSITIONS[i][0]+353, POTATO_POSITIONS[i][1]+215)
                     break
                 elif value == 0:
                     pass
-                else:
-                    print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
-                    last_closet = CLOSET_INDEX[i]
-                    last_value = value
+                # else:
+                    # print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
+                    # last_closet = CLOSET_INDEX[i]
+                    # last_value = value
 
-            time.sleep(0.01)
+            time.sleep(0.001)
         # Convert image to a NumPy array
     #     img_np = np.array(img)
 
@@ -106,7 +106,7 @@ for i in range(4000):
     #             r, g, b = img_np[y, x]
     #             if abs(r - g) < threshold and abs(r - b) < threshold and abs(g - b) < threshold:
     #                 grayscale_coords.append((x, y))
-    #                 # print(f"Grayscale pixel found at ({x}, {y})")
+                    # print(f"Grayscale pixel found at ({x}, {y})")
 
     #     # Optionally, save grayscale-coordinates image for reference
     #     for (x, y) in grayscale_coords:
@@ -116,7 +116,7 @@ for i in range(4000):
     #     img_with_grayscale.save("window_with_grayscale_marked.png")
 
     # else:
-    #     print("Failed to capture the window.")
+        # print("Failed to capture the window.")
 
     # # Clean up
     # dc.DeleteDC()
