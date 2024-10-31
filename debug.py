@@ -18,15 +18,32 @@ def background_screenshot(hwnd, width, height):
     win32gui.DeleteObject(dataBitMap.GetHandle())
 
 
-windowname="Farmer Against Potatoes Idle"
+    #     img_np = np.array(img)
 
-hwnd = FindWindow(None, windowname)
-print(hex(hwnd))
-background_screenshot(hwnd, 1280, 780)
+    #     # Define threshold for grayscale detection
+    #     threshold = 2
 
-def windows(hwnd, ctx):
-    if win32gui.IsWindowVisible(hwnd):
-        if win32gui.GetWindowText(hwnd) == windowname:
-            print(hex(hwnd), win32gui.GetWindowText(hwnd))
+    #     # Identify grayscale pixels by checking if R, G, and B values are close to each other
+    #     grayscale_coords = []
+    #     for y in range(height):
+    #         for x in range(width):
+    #             r, g, b = img_np[y, x]
+    #             if abs(r - g) < threshold and abs(r - b) < threshold and abs(g - b) < threshold:
+    #                 grayscale_coords.append((x, y))
+                    # print(f"Grayscale pixel found at ({x}, {y})")
 
-win32gui.EnumWindows(windows, None)
+    #     # Optionally, save grayscale-coordinates image for reference
+    #     for (x, y) in grayscale_coords:
+    #         img_np[y, x] = [255, 0, 0]  # Mark grayscale pixels in red for visibility
+
+    #     img_with_grayscale = Image.fromarray(img_np)
+    #     img_with_grayscale.save("window_with_grayscale_marked.png")
+
+    # else:
+        # print("Failed to capture the window.")
+
+    # # Clean up
+    # dc.DeleteDC()
+    # memdc.DeleteDC()
+    # win32gui.ReleaseDC(hwnd, hdc)
+    # win32gui.DeleteObject(bitmap.GetHandle())
