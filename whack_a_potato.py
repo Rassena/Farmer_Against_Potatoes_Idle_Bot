@@ -4,7 +4,6 @@ import win32ui
 from PIL import Image, ImageOps, ImageChops
 import numpy as np
 import pyautogui
-import time
 
 WINDOW_NAME = "Farmer Against Potatoes Idle"
 
@@ -53,17 +52,23 @@ def fill_lists():
             )
 
 
+def get_img(bitmap):
+    """Retrieve the bitmap data"""
+    bmpinfo = bitmap.GetInfo()
+    bmpstr = bitmap.GetBitmapBits(True)
+    img = Image.frombuffer(
+        "RGB",
+        (bmpinfo["bmWidth"], bmpinfo["bmHeight"]),
+        bmpstr,
+        "raw",
+        "BGRX",
+        0,
+        1,
+    )
+    return img
+
+
 fill_lists()
-
-# window = 0
-# def windows(hwnd, ctx):
-#     global window
-#     if win32gui.IsWindowVisible(hwnd):
-#         if win32gui.GetWindowText(hwnd) == "Farmer Against Potatoes Idle":
-#             window = hwnd
-
-# win32gui.EnumWindows(windows, None)
-
 
 if win32gui.IsWindow(hwnd):
     # Get the window's dimensions
@@ -84,20 +89,9 @@ if win32gui.IsWindow(hwnd):
     for i in range(40000):
         # Capture the window
         result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
-        if result == 1:
-            # Retrieve the bitmap data
-            bmpinfo = bitmap.GetInfo()
-            bmpstr = bitmap.GetBitmapBits(True)
-            img = Image.frombuffer(
-                "RGB",
-                (bmpinfo["bmWidth"], bmpinfo["bmHeight"]),
-                bmpstr,
-                "raw",
-                "BGRX",
-                0,
-                1,
-            )
 
+        if result == 1:
+            img = get_img(bitmap)
             img_gray = ImageOps.grayscale(img)
             img_difference = ImageChops.difference(
                 img_base,
@@ -127,3 +121,13 @@ if win32gui.IsWindow(hwnd):
             # print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
             # last_closet = CLOSET_INDEX[i]
             # last_value = value
+
+
+# window = 0
+# def windows(hwnd, ctx):
+#     global window
+#     if win32gui.IsWindowVisible(hwnd):
+#         if win32gui.GetWindowText(hwnd) == "Farmer Against Potatoes Idle":
+#             window = hwnd
+
+# win32gui.EnumWindows(windows, None)
