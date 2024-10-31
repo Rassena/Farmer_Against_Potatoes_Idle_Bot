@@ -152,7 +152,7 @@ def game_bot():
                         )
                         break
                 # detect reward
-                if int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_1)))) == 53 and int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_2)))):
+                if int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_1)))) in range (50, 60) and int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_2)))) in range (50, 60):
                     img_difference.save("last_img.png")
                     # print("Broke!")
                     break
