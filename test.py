@@ -18,14 +18,14 @@ POTATO_CROP_BOX_POSITIONS = []
 ALLOWED_COLORS = []
 for i in range(180, 195):
     ALLOWED_COLORS.append(i)
-for i in range(157, 160):
+for i in range(152, 160):
     ALLOWED_COLORS.append(i)
 
 for i in range(0,5):
     for j in range(3):
         POTATO_POSITIONS.append((65+131*i, 139+215*j))
         CLOSET_INDEX.append((i,j))
-        POTATO_CROP_BOX_POSITIONS.append((60+131*i, 134+215*j, 70+131*i, 144+215*j))
+        POTATO_CROP_BOX_POSITIONS.append((63+131*i, 137+215*j, 67+131*i, 141+215*j))
 
 # Replace with the hexadecimal handle of the window you want to capture
 window = 0
@@ -41,7 +41,7 @@ hwnd = 0x390f5a
 
 print(hwnd)
 
-for i in range(2000):
+for i in range(4000):
     if win32gui.IsWindow(hwnd):
         # Get the window's dimensions
         left, top, right, bottom = win32gui.GetWindowRect(hwnd)
@@ -79,22 +79,20 @@ for i in range(2000):
 
             for i in range(len(POTATO_POSITIONS)):
                 value = int(tmp.getpixel(POTATO_POSITIONS[i]))
-                if value in ALLOWED_COLORS:
-                    average_box = tmp.crop(POTATO_CROP_BOX_POSITIONS[i])
-                    image_array_average = np.average(np.array(average_box))
+                average_box = tmp.crop(POTATO_CROP_BOX_POSITIONS[i])
+                image_array_average = int(np.average(np.array(average_box)))
+                if image_array_average in ALLOWED_COLORS:
                     print(CLOSET_INDEX[i], value, image_array_average)
                     pyautogui.click(POTATO_POSITIONS[i][0]+353, POTATO_POSITIONS[i][1]+215)
                     break
                 elif value == 0:
                     pass
                 else:
-                    average_box = tmp.crop(POTATO_CROP_BOX_POSITIONS[i])
-                    image_array_average = np.average(np.array(average_box))
                     print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
                     last_closet = CLOSET_INDEX[i]
                     last_value = value
 
-            time.sleep(0.02)
+            time.sleep(0.01)
         # Convert image to a NumPy array
     #     img_np = np.array(img)
 
