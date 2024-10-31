@@ -4,6 +4,7 @@ import win32ui
 from PIL import Image, ImageOps, ImageChops
 import numpy as np
 import pyautogui
+from time import sleep
 
 WINDOW_NAME = "Farmer Against Potatoes Idle"
 
@@ -21,18 +22,25 @@ CLOSET_ROW_OFFSET = 215
 
 CROP_BOX_RAD = 2
 
-WHACK_OFFSET_0 = 353
-WHACK_OFFSET_1 = 215
+WHACK_OFFSET_X = 353
+WHACK_OFFSET_Y = 215
 
 WHACK_WIDTH = 663
 WHACK_HEIGHT = 634
 
+WHACK_REWARD_POPUP_CHECK_BOX_1 = (387, 200, 405, 212)
+WHACK_REWARD_POPUP_CHECK_BOX_2 = (512, 200, 531, 212)
+START_BUTTON_COORDINATES = (661, 987)
+
 img_base = Image.open("grayscale.png")
-hwnd = 0x23108A
+hwnd = win32gui.FindWindow(None, WINDOW_NAME)
 
 
 def fill_lists():
-    for col in range(0, 5):
+    """
+    Fill lists with closet data
+    """
+    for col in range(5):
         for row in range(3):
             CLOSET_INDEX.append((col, row))
 
@@ -70,7 +78,39 @@ def get_img(bitmap):
 
 fill_lists()
 
-if win32gui.IsWindow(hwnd):
+def crop_game_image(bitmap):
+    """    Crop ingame image for comparasion to whack grayscale.png
+
+    Args:
+        bitmap (bitmap): Bitmap of game window
+
+    Returns:
+        Image: Image difference between bitmap and grayscale.png
+    """
+    img = get_img(bitmap)
+    img_gray = ImageOps.grayscale(img)
+    img_difference = ImageChops.difference(
+        img_base,
+        img_gray.crop(
+            (
+                WHACK_OFFSET_X,
+                WHACK_OFFSET_Y,
+                WHACK_OFFSET_X + WHACK_WIDTH,
+                WHACK_OFFSET_Y + WHACK_HEIGHT,
+            )
+        ),
+    )
+    return img_difference
+
+def get_bitmap(hwnd):
+    """Get game window bitmap for further processing
+
+    Args:
+        hwnd (hex): Game window hwnd
+
+    Returns:
+        tuple (PyDC, PyDC): ja nie wiem co to jest xD, Bitmap of game window
+    """
     # Get the window's dimensions
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     width = right - left
@@ -85,49 +125,58 @@ if win32gui.IsWindow(hwnd):
     bitmap = win32ui.CreateBitmap()
     bitmap.CreateCompatibleBitmap(dc, width, height)
     memdc.SelectObject(bitmap)
+    
+    return memdc, bitmap
 
-    for i in range(40000):
-        # Capture the window
-        result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
+def game_bot():
+    """
+    Whack playing bot
+    """
+    if win32gui.IsWindow(hwnd):
 
-        if result == 1:
-            img = get_img(bitmap)
-            img_gray = ImageOps.grayscale(img)
-            img_difference = ImageChops.difference(
-                img_base,
-                img_gray.crop(
-                    (
-                        WHACK_OFFSET_0,
-                        WHACK_OFFSET_1,
-                        WHACK_OFFSET_0 + WHACK_WIDTH,
-                        WHACK_OFFSET_1 + WHACK_HEIGHT,
-                    )
-                ),
-            )
+        memdc, bitmap = get_bitmap(hwnd)
+        while True:
+            # Capture the window
+            result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
 
-            for index, potato_position in enumerate(POTATO_POSITIONS):
-                average_box = img_difference.crop(POTATO_CROP_BOX_POSITIONS[index])
-                if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
-                    # print(CLOSET_INDEX[i], value, image_array_average)
-                    pyautogui.click(
-                        potato_position[0] + WHACK_OFFSET_0,
-                        potato_position[1] + WHACK_OFFSET_1,
-                    )
+            if result == 1:
+                img_difference = crop_game_image(bitmap)
+                for index, potato_position in enumerate(POTATO_POSITIONS):
+                    average_box = img_difference.crop(POTATO_CROP_BOX_POSITIONS[index])
+                    if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
+                        # print(CLOSET_INDEX[i], value, image_array_average)
+                        pyautogui.click(
+                            potato_position[0] + WHACK_OFFSET_X,
+                            potato_position[1] + WHACK_OFFSET_Y,
+                        )
+                        break
+                # detect reward
+                if int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_1)))) == 53 and int(np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_2)))):
+                    img_difference.save("last_img.png")
+                    # print("Broke!")
                     break
 
-            # elif value == 0:
-            #     pass
-            # else:
-            # print("Didn't hit the forbidden color at ", CLOSET_INDEX[i], value, image_array_average)
-            # last_closet = CLOSET_INDEX[i]
-            # last_value = value
-
-
-# window = 0
-# def windows(hwnd, ctx):
-#     global window
-#     if win32gui.IsWindowVisible(hwnd):
-#         if win32gui.GetWindowText(hwnd) == "Farmer Against Potatoes Idle":
-#             window = hwnd
-
-# win32gui.EnumWindows(windows, None)
+while True:
+    # Check if player is in game (window is not minimised)
+    if win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):
+        # print("checking window")
+        memdc, bitmap = get_bitmap(hwnd)
+        result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
+        img_difference = crop_game_image(bitmap)
+        #check if player is in
+        if int(np.average(np.array(img_difference))) <= 1:
+            # print("player in whack, starting bot")
+            # Start whack
+            pyautogui.click(
+                START_BUTTON_COORDINATES[0],
+                START_BUTTON_COORDINATES[1]
+            )
+            game_bot()
+            sleep(305)
+        else:
+            pass 
+            # code for checking if player is in main game window and checking if whack has ended - to be done
+    else:
+        # print("sleeping")
+        sleep(5)
+    
