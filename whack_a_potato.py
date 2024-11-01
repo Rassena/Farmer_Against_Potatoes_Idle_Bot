@@ -25,8 +25,8 @@ from whack_a_potato_debug import *
 #       ? add auto create subfolder debug ?
 #       ? use git branches ?
 
-DEBUG = True
-VERBOSE = True
+DEBUG = False
+VERBOSE = False
 
 wack_board_grey = Image.open(WHACK_BOARD_GREY_IMAGE)
 wack_ready_grey = Image.open(WHACK_READY_IMAGE)
@@ -77,15 +77,25 @@ def is_reward_granted(img_difference):
         return False
 
 
-def is_potato_hit(average_box, potato_position):
+def is_potato_hit(average_box, potato_position, bitmap=None):
+    """
+    Return bool if hit good potato
+    """
     if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
-        pyautogui.click(
+        click = (
             potato_position[0] + WHACK_BOARD_OFFSET_X,
             potato_position[1] + WHACK_BOARD_OFFSET_Y,
         )
+        pyautogui.click(click[0], click[1])
+        if DEBUG and bitmap:
+            save_screenshot(bitmap, "hit_potato", click=click)
         return True
     else:
         return False
+
+
+def is_still_in_game():
+    pass
 
 
 def game_bot():
@@ -93,7 +103,7 @@ def game_bot():
     Whack playing bot
     """
     if win32gui.IsWindow(hwnd):
-
+        empty_iteration = 0
         memdc, bitmap = get_bitmap(hwnd)
         while True:
             # Capture the window
@@ -107,45 +117,64 @@ def game_bot():
                 )
                 for index, potato_position in enumerate(POTATO_POSITIONS):
                     average_box = img_difference.crop(POTATO_CROP_BOX_POSITIONS[index])
-                    if is_potato_hit(average_box, potato_position):
+                    if is_potato_hit(average_box, potato_position, bitmap):
                         break
                 # detect reward
                 if is_reward_granted(img_difference):
                     if DEBUG:
-                        save_screenshot(bitmap, "Whack_finish")
+                        save_screenshot(bitmap, "Whack_finish", WHACK_CLOSET_POTATO_BOX)
                     print("Whack finished")
                     break
-
-
-while True:
-    # Check if player is in game (window is not minimised)
-    if win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):
-        # print("checking window")
-        memdc, bitmap = get_bitmap(hwnd)
-        result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
-        # check if player is in whack main window
-        if is_in_whack(bitmap):
-            # Start whack
-            if is_wack_ready(bitmap):
+            empty_iteration += 1
+            if VERBOSE:
+                print("empty iteration", empty_iteration)
+            if empty_iteration % 10000 == 0:
+                print("check empty iteration")
                 if DEBUG:
-                    save_screenshot(bitmap, "Whack_start")
-                print("start whacking")
-                pyautogui.click(
-                    WHACK_START_BUTTON_COORDINATES[0], WHACK_START_BUTTON_COORDINATES[1]
-                )
-                game_bot()
-                print("sleep 5 min")
-                sleep(305)
+                    save_screenshot(bitmap, "Whack_empty_iteration")
+
+
+def start_game():
+    while True:
+        # Check if player is in game (window is not minimised)
+        if win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):
+            # print("checking window")
+            memdc, bitmap = get_bitmap(hwnd)
+            result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
+            # check if player is in whack main window
+            if is_in_whack(bitmap):
+                # Start whack
+                if is_wack_ready(bitmap):
+                    if DEBUG:
+                        save_screenshot(bitmap, "Whack_start", WHACK_POTATOES_READY_BOX)
+                    print("start whacking")
+                    pyautogui.click(
+                        WHACK_START_BUTTON_COORDINATES[0],
+                        WHACK_START_BUTTON_COORDINATES[1],
+                    )
+                    game_bot()
+                    print("sleep 5 min")
+                    sleep(305)
+                else:
+                    if VERBOSE:
+                        print("Wack is not ready")
+                    if DEBUG:
+                        save_screenshot(
+                            bitmap, "Whack_not_ready", WHACK_POTATOES_READY_BOX
+                        )
+                    sleep(5)
             else:
+                # code for checking if player is in main game window and checking if whack has ended - to be done
                 if VERBOSE:
-                    print("Wack is not ready")
+                    print("Not in Whack module")
+                if DEBUG:
+                    save_screenshot(bitmap, "Whack_not_ready", WHACK_HEADER_CHECK_BOX)
                 sleep(5)
         else:
-            # code for checking if player is in main game window and checking if whack has ended - to be done
             if VERBOSE:
-                print("Not in Whack module")
+                print("sleeping")
             sleep(5)
-    else:
-        if VERBOSE:
-            print("sleeping")
-        sleep(5)
+
+
+if __name__ == "__main__":
+    start_game()
