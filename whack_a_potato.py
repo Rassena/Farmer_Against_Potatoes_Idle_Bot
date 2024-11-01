@@ -18,6 +18,7 @@ from whack_a_potato_debug import *
 #       use asyncio for debug
 #
 #
+#       ? get info which buff get ?
 #       ? isolate const to other file ?
 #       ? update requirement ?
 #       ? use LOG instead of print ?
@@ -25,29 +26,66 @@ from whack_a_potato_debug import *
 #       ? use git branches ?
 
 DEBUG = True
+VERBOSE = True
 
-img_base = Image.open(WHACK_BOARD_GREY_IMAGE)
+wack_board_grey = Image.open(WHACK_BOARD_GREY_IMAGE)
+wack_ready_grey = Image.open(WHACK_READY_IMAGE)
+wack_header_grey = Image.open(WHACK_HEADER_IMAGE)
+wack_shop_grey = Image.open(WHACK_SHOP_GREY_IMAGE)
+
 hwnd = win32gui.FindWindow(None, WINDOW_NAME)
 
 
-def is_board_visible():
+def is_wack_ready(bitmap):
     """
     Return bool if game is in whack mini-game
     """
-    pass
+    img_difference = difference_between_images(
+        bitmap,
+        wack_ready_grey,
+        crop_box=WHACK_POTATOES_READY_BOX,
+    )
+    return np.average(np.array(img_difference)) < 1
 
 
-def is_in_whack():
+def is_in_whack(bitmap):
     """
     Return bool if game is in whack module
     """
-    pass
+    img_difference = difference_between_images(
+        bitmap,
+        wack_header_grey,
+        crop_box=WHACK_HEADER_CHECK_BOX,
+    )
+    return np.average(np.array(img_difference)) < 1
 
-def is_reward_granted():
+
+def is_reward_granted(img_difference):
     """
     Return bool if whack reward granted
     """
-    pass
+
+    if int(
+        np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_1)))
+    ) in range(50, 60) and int(
+        np.average(np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_2)))
+    ) in range(
+        50, 60
+    ):
+        return True
+    else:
+        return False
+
+
+def is_potato_hit(average_box, potato_position):
+    if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
+        pyautogui.click(
+            potato_position[0] + WHACK_BOARD_OFFSET_X,
+            potato_position[1] + WHACK_BOARD_OFFSET_Y,
+        )
+        return True
+    else:
+        return False
 
 
 def game_bot():
@@ -64,31 +102,17 @@ def game_bot():
             if result == 1:
                 img_difference = difference_between_images(
                     bitmap,
-                    img_base,
+                    wack_board_grey,
                     crop_box=WHACK_CLOSET_POTATO_BOX,
                 )
                 for index, potato_position in enumerate(POTATO_POSITIONS):
                     average_box = img_difference.crop(POTATO_CROP_BOX_POSITIONS[index])
-                    if int(np.average(np.array(average_box))) in ALLOWED_COLORS:
-                        # print(CLOSET_INDEX[i], value, image_array_average)
-                        pyautogui.click(
-                            potato_position[0] + WHACK_OFFSET_X,
-                            potato_position[1] + WHACK_OFFSET_Y,
-                        )
+                    if is_potato_hit(average_box, potato_position):
                         break
                 # detect reward
-                if int(
-                    np.average(
-                        np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_1))
-                    )
-                ) in range(50, 60) and int(
-                    np.average(
-                        np.array(img_difference.crop(WHACK_REWARD_POPUP_CHECK_BOX_2))
-                    )
-                ) in range(
-                    50, 60
-                ):
-                    save_screenshot(bitmap, "Whack_finish") if DEBUG else 0
+                if is_reward_granted(img_difference):
+                    if DEBUG:
+                        save_screenshot(bitmap, "Whack_finish")
                     print("Whack finished")
                     break
 
@@ -99,30 +123,29 @@ while True:
         # print("checking window")
         memdc, bitmap = get_bitmap(hwnd)
         result = ctypes.windll.user32.PrintWindow(hwnd, memdc.GetSafeHdc(), 2)
-        img_difference = difference_between_images(
-            bitmap,
-            img_base,
-            crop_box=WHACK_CLOSET_POTATO_BOX,
-        )
-        shop_image = difference_between_images(
-            bitmap,
-            img_base=Image.open(WHACK_SHOP_IMAGE),
-            crop_box=(1474, 909, 1654, 994),
-        )
-        # check if player is in whack main window or in whack shop
-        if (
-            int(np.average(np.array(img_difference))) <= 1
-            or int(np.average(np.array(shop_image))) <= 10
-        ):
+        # check if player is in whack main window
+        if is_in_whack(bitmap):
             # Start whack
-            print("starting whacking")
-            save_screenshot(bitmap, "Whack_start") if DEBUG else 0
-            pyautogui.click(START_BUTTON_COORDINATES[0], START_BUTTON_COORDINATES[1])
-            game_bot()
-            # sleep(305)
+            if is_wack_ready(bitmap):
+                if DEBUG:
+                    save_screenshot(bitmap, "Whack_start")
+                print("start whacking")
+                pyautogui.click(
+                    WHACK_START_BUTTON_COORDINATES[0], WHACK_START_BUTTON_COORDINATES[1]
+                )
+                game_bot()
+                print("sleep 5 min")
+                sleep(305)
+            else:
+                if VERBOSE:
+                    print("Wack is not ready")
+                sleep(5)
         else:
-            pass
             # code for checking if player is in main game window and checking if whack has ended - to be done
+            if VERBOSE:
+                print("Not in Whack module")
+            sleep(5)
     else:
-        print("sleeping")
+        if VERBOSE:
+            print("sleeping")
         sleep(5)
