@@ -8,6 +8,17 @@ from time import sleep
 import datetime
 from pathlib import Path
 
+#   TODO:
+#       get all whack buff icon
+#       fix if whack can start
+#       add check if in wack by "WHACK A POTATO" header screenshot
+#       use asyncio for debug
+#
+#
+#       ? use LOG instead of print ?
+#       ? add auto create subfolder debug ?
+#       ? use git branches ?
+
 WHACK_FOLDER = Path.cwd() / "data" / "whack_a_potato"
 DEBUG_FOLDER = WHACK_FOLDER / "debug"
 
