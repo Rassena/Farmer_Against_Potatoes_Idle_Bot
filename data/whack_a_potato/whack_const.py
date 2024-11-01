@@ -5,8 +5,8 @@ DEBUG_FOLDER = WHACK_FOLDER / "debug"
 
 WHACK_BOARD_GREY_IMAGE = WHACK_FOLDER / "grayscale_whack_board.png"
 WHACK_SHOP_GREY_IMAGE = WHACK_FOLDER / "grayscale_shop.png"
-WHACK_HEADER_IMAGE = WHACK_FOLDER / "whack_a_potato_header.png"
-WHACK_READY_IMAGE = WHACK_FOLDER / "potatoes_are_ready.png"
+WHACK_HEADER_IMAGE = WHACK_FOLDER / "grayscale_whack_a_potato_header.png"
+WHACK_READY_IMAGE = WHACK_FOLDER / "grayscale_potatoes_are_ready.png"
 
 POTATO_POSITIONS = []
 CLOSET_INDEX = []
