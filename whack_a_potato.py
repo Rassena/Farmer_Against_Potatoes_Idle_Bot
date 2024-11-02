@@ -25,7 +25,7 @@ from whack_a_potato_debug import save_screenshot
 #       ? add auto create subfolder debug ?
 #       ? use git branches ?
 
-DEBUG = False
+DEBUG = True
 VERBOSE = False
 
 wack_board_grey = Image.open(w_const.WHACK_BOARD_GREY_IMAGE)
@@ -35,6 +35,7 @@ wack_shop_grey = Image.open(w_const.WHACK_SHOP_GREY_IMAGE)
 
 hwnd = win32gui.FindWindow(None, WINDOW_NAME)
 
+potato_to_check = []
 
 def fill_lists():
     """
@@ -112,7 +113,8 @@ def is_potato_hit(average_box, potato_position, bitmap=None):
         )
         pyautogui.click(click[0], click[1])
         if DEBUG and bitmap:
-            save_screenshot(bitmap, "hit_potato", click=click)
+            if potato_position in potato_to_check:
+                save_screenshot(bitmap, "hit_potato", click=click)
         return True
     else:
         return False
@@ -144,14 +146,14 @@ def game_bot():
                 # detect reward
                 if is_reward_granted(img_difference):
                     if DEBUG:
-                        save_screenshot(bitmap, "Whack_finish", w_const.WHACK_CLOSET_POTATO_BOX)
-                        save_screenshot(bitmap, "Whack_finish", w_const.WHACK_CLOSET_POTATO_BOX)
+                        save_screenshot(bitmap, "reward_granted_01", w_const.WHACK_REWARD_POPUP_CHECK_BOX_1)
+                        save_screenshot(bitmap, "reward_granted_02", w_const.WHACK_REWARD_POPUP_CHECK_BOX_2)
                     print("Whack finished")
                     break
             empty_iteration += 1
             if VERBOSE:
                 print("empty iteration", empty_iteration)
-            if empty_iteration % 10000 == 0:
+            if empty_iteration % 1000 == 0:
                 print("check empty iteration")
                 if DEBUG:
                     save_screenshot(
@@ -213,4 +215,5 @@ if __name__ == "__main__":
 
     """
     fill_lists()
+    potato_to_check = [w_const.POTATO_POSITIONS[3],w_const.POTATO_POSITIONS[4],w_const.POTATO_POSITIONS[5]]
     start_game()

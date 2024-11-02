@@ -7,11 +7,11 @@ from data.whack_a_potato.whack_const import WHACK_FOLDER
 from utils import get_img
 
 DEBUG_DRAW_BOX = True
-DEBUG_DRAW_CLICK = True
+DEBUG_DRAW_CLICK = False
 
-DEBUG_WHACK_POTATO_HIT = False
+DEBUG_WHACK_POTATO_HIT = True
+DEBUG_START_GAME = False
 DEBUG_GAME_BOT = True
-DEBUG_START_GAME = True
 
 VERBOSE = True
 
