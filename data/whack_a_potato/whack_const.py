@@ -1,7 +1,6 @@
 from pathlib import Path
 
 WHACK_FOLDER = Path(__file__).parent
-DEBUG_FOLDER = WHACK_FOLDER / "debug"
 
 WHACK_BOARD_GREY_IMAGE = WHACK_FOLDER / "grayscale_whack_board.png"
 WHACK_SHOP_GREY_IMAGE = WHACK_FOLDER / "grayscale_shop.png"
@@ -46,28 +45,3 @@ WHACK_CLOSET_POTATO_BOX=(
     WHACK_BOARD_OFFSET_Y + WHACK_BOARD_HEIGHT,
 )
 
-def fill_lists():
-    """
-    Fill lists with closet data
-    """
-    for col in range(CLOSET_COLUMNS):
-        for row in range(CLOSET_ROWS):
-            CLOSET_INDEX.append((col, row))
-
-            closet_center = (
-                FIRST_CLOSET_CENTER[0] + CLOSET_COL_OFFSET * col,
-                FIRST_CLOSET_CENTER[1] + CLOSET_ROW_OFFSET * row,
-            )
-            POTATO_POSITIONS.append(closet_center)
-
-            POTATO_CROP_BOX_POSITIONS.append(
-                (
-                    closet_center[0] - CROP_BOX_RAD,
-                    closet_center[1] - CROP_BOX_RAD,
-                    closet_center[0] + CROP_BOX_RAD,
-                    closet_center[1] + CROP_BOX_RAD,
-                )
-            )
-
-
-fill_lists()
