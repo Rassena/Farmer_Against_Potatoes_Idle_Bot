@@ -1,6 +1,8 @@
 /.venv
 /.vscode
+/build
+/dist
 /data/whack_a_potato/debug
 
-
+*.spec
 **/*.pyc
